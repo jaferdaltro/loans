@@ -1,65 +1,156 @@
-# README
+# Loans HTTP REST API
 
-Nexoos Challenge
-
-Seu desafio será completar o desenvolvimento dessa API capaz de gerir empréstimos, salvando informações necessárias do cliente para podermos realizar o cálculo do valor da parcela (PMT), além de haver a possibilidade de leitura desses dados pelo cliente.
-
-Deve-se:
-
-- Modelar o banco de dados parar ter os dados necessários do cálculo da PMT
-- Completar as rotas `POST /loans` e `GET /loans/ID`, alterando a API para escrever e retornar dados do banco de dados.
-  - Na escrita, deve-se calcular o valor da parcela (PMT) e salvar no banco de dados.
-
-Sobre a PMT:
-
-https://fia.com.br/blog/matematica-financeira/#:~:text=PMT%20s%C3%A3o%20pagamentos%20de%20mesmo,ou%20empresarial)%20de%20forma%20recorrente.&text=Por%20isso%2C%20tamb%C3%A9m%20s%C3%A3o%20tratados,fixa%20de%20empr%C3%A9stimo%20ou%20financiamento
-
-Cálculo da PMT:
-
-http://ghiorzi.org/amortiza.htm
+This is an example of a Loan calucule with a HTTP REST API interface. This sample illustrates the loan request with value and interest and receve a result with part of year term.
 
 
-Post Request para Loans:
+## Setting up the environment
 
-```
-curl --request POST http://localhost:3000/loans -d \
- value=1000& \
- taxa=0.2
+Have the following requirements installed on your machine:
+
+- Ruby version 2.7.2
+- Rails 6.1.3.2
+- MacOS X or Linux (Rails is unstable on Windows).
+
+
+## Usage
+
+After downloading the app. 
+
+```sh
+bundle
 ```
 
-Expected Response:
+### How to run the server
+
+Execute the command as follows to startup the server.
+```sh
+rails s
+```
+### Running specs
+
+```sh
+# Default: Run all spec files (i.e., those matching spec/**/*_spec.rb)
+$ bundle exec rspec
+
+# Run only model 
+$ bundle exec rspec spec/models
+
+# Run only request
+$ bundle exec rspec spec/requests
 
 ```
-{
-  "loan": {
-    "id": 1
-  }
-}
+
+
+## HTTP REST API Endpoints
+
+The table bellow describes each endpoint. 
+
+| Path          | Method | Request Body                                   | Description                                      |
+|---------------|--------|------------------------------------------------|--------------------------------------------------|
+| /Loans        | POST   | `{ "value": 1000, "taxa": 0.2}`                | Add an value and interest rate                   |
+| /Loans/`<id>` | GET    | N/A                                            | Receive a part of year term. given an loan `id`. |
+
+
+
+
+
+
+
+
+
+
+
+
+# Spring Boot LDAP HTTP REST API
+
+<a href="https://codecov.io/github/ItaloYeltsin/ldap-rest-api-sample/?branch=master" rel="some text">![Foo](https://codecov.io/github/ItaloYeltsin/ldap-rest-api-sample/coverage.svg?branch=master)</a>
+
+
+This is an example of a LDAP server with a HTTP REST API interface. This sample illustrates the CRUD of users under **OU** Users to the domain `theinterview.com`. The management of users is made via a HTTP REST API.
+
+In the subsequent sections you will see: i) how to setup the environment; ii) the commands required to run the server; and iii) how to run tests.
+
+## Setting up the environment
+
+Have the following requirements installed on your machine:
+- Docker CE ([Ubuntu](https://docs.docker.com/engine/install/ubuntu/) | [MacOS X](https://docs.docker.com/docker-for-mac/install/));
+- MacOS X or Linux (Docker is unstable on Windows).
+
+## Project Structure
+
+See the project structure bellow.
+
+```
+.
+├── .env
+├── README.md
+├── config
+│   └── create_ou_users.ldif
+├── docker-compose.yaml
+└── ldap-rest-api (Java Project)
+    ├── mvnw
+    ├── mvnw.cmd
+    ├── pom.xml
+    └── src
 ```
 
-Get Request para Loans:
+The `docker-compose.yaml` describes the orchestration of two container services. The first one, `ldap-server`, runs an instance of the OpenLDAP server, see [osixia/openldap](https://github.com/osixia/docker-openldap). The second service, `rest-api`, runs the Java Spring Boot project inside folder `ldap-rest-api` which is the HTTP REST API interface. 
 
-```curl --request GET http://localhost:3000/loans/1```
+The file `config/create_ou_users.ldif` describes the **OU** Users structure that will hold the users that come from the HTTP REST API. 
 
-Expected Response:
+
+The default **LDAP_ADMIN_PASSWORD** is *123456* and comes from the `.env` file at the root of the project. If you want to change the LDAP server password you can override the value by exporting the environment variable **LDAP_ADMIN_PASSWORD** or change the value at the `.env` file.
+
+To shutdown the server, execute `docker-compose down`.
+
+### Persisting data
+
+You may wish to persist data even after the container stops. To do so, at your host machine, create the folders `${PATH_TO_YOUR_DATA}/lpad/sldap/database` and `${PATH_TO_YOUR_DATA}/lpad/sldap/config`. Then bind these folders as follows in your `docker-compose.yaml`:
+
+```yaml
+version: '3'
+services:
+  ldap-server:
+    image: "osixia/openldap:1.3.0"
+    .
+    .
+    .
+    volumes:
+        .
+        .
+        .
+        - ${PATH_TO_YOUR_DATA}/lpad/sldap/database:/var/lib/ldap
+        - ${PATH_TO_YOUR_DATA}/lpad/sldap/config:/etc/ldap/slapd.d
+    .
+    .
+    .
 ```
-{
-  "loan": {
-    "id": 1, "pmt": 308
-  }
-}
+
+
+## How to see logs
+
+To see the logs, execute the command:
+```sh
+docker-compose logs -f
 ```
 
-Requisitos técnicos
-- Usar Ruby on Rails
-- É permitido o uso de frameworks e gems
-- Deve ser usado GIT para versionamento
+## How to run tests
 
-Pontos extras para:
+Execute the maven wrapper with the following args:
 
-- Documentação
-- Testes unitários e/ou de integração com Rspec
+```sh
+./mvnw test
+```
+This requires **Java JDK 11** installed.
 
-Envio:
+## HTTP REST API Endpoints
 
-Envie o seu código pronto através de um Pull Request para esse repositório
+You can see the documentation after starting up your server at `http://localhost:8080/swagger-ui/`. In addition, the table bellow describes each endpoint. 
+
+| Path         | Method | Request Body                                   | Description                                 |
+|--------------|--------|------------------------------------------------|---------------------------------------------|
+| /Users       | POST   | `{ "uid": "john", "cn": "John", "sn": "Doe" }` | Add an user entry.                           |
+| /Users       | GET    | N/A                                            | Retrieve all users.                          |
+| /Users/`<uid>` | GET    | N/A                                            | Retrieve a user entry.given an user `uid`. |
+| /Users/`<uid>` | DELETE | N/A                                            | Delete a user entry. given an user `uid`.   |
+
